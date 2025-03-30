@@ -1,9 +1,7 @@
+from services.secrets import SUPABASE_URL, SUPABASE_KEY
 import pandas as pd
 import requests
 import streamlit as st
-
-SUPABASE_URL = st.secrets["supabase"]["url"]
-SUPABASE_KEY = st.secrets["supabase"]["api_key"]
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
@@ -11,7 +9,6 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
-# ✅ Supabase에서 모든 평가 결과 불러오기
 def load_all_evaluation_results():
     url = f"{SUPABASE_URL}/rest/v1/evaluations?select=*"
     response = requests.get(url, headers=HEADERS)

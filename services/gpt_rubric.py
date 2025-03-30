@@ -1,24 +1,10 @@
-import os
-import json
+from services.secrets import SUPABASE_URL, SUPABASE_KEY, OPENAI_API_KEY
 import re
-import streamlit as st
-from openai import OpenAI
-from dotenv import load_dotenv
-from datetime import datetime
 import requests
+from openai import OpenAI
+from datetime import datetime
 
-# ✅ 환경 변수 로드 및 키 설정
-load_dotenv()
-api_key = st.secrets["openai"]["openai_api_key"]  # secrets.toml 사용
-
-if not api_key:
-    raise ValueError("❗ OpenAI API 키가 설정되지 않았습니다.")
-
-client = OpenAI(api_key=api_key)
-
-# ✅ Supabase API 설정
-SUPABASE_URL = st.secrets["supabase"]["url"]
-SUPABASE_KEY = st.secrets["supabase"]["api_key"]
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
@@ -26,27 +12,23 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
-# ✅ GPT 평가 요청
 def grade_conversation(chat_data, rubric_prompt):
-    # 🔹 학생 질문만 추출
     dialogue_text = ""
     for user_msg, _ in chat_data:
         dialogue_text += f"학생 질문: {user_msg}\n"
 
-    # 🔹 GPT 메시지 구성
     messages = [
         {"role": "system", "content": rubric_prompt},
         {"role": "user", "content": dialogue_text}
     ]
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",  # 필요 시 모델 변경
+        model="gpt-4o-mini",
         messages=messages
     )
 
     content = response.choices[0].message.content
 
-    # ✅ 응답 파싱
     scores = {}
     explanations = {}
     summary = ""
@@ -72,7 +54,6 @@ def grade_conversation(chat_data, rubric_prompt):
         "summary": summary
     }
 
-# ✅ 평가 결과 저장 → Supabase
 def save_evaluation_result(student_id, class_id, conversation_id, result):
     data = {
         "student_id": student_id,
@@ -91,7 +72,6 @@ def save_evaluation_result(student_id, class_id, conversation_id, result):
     )
     return response.status_code == 201
 
-# ✅ 평가 결과 불러오기 → Supabase
 def load_evaluation_result(conversation_id):
     url = f"{SUPABASE_URL}/rest/v1/evaluations?conversation_id=eq.{conversation_id}&select=*"
     response = requests.get(url, headers=HEADERS)
