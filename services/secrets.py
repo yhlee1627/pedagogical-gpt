@@ -4,12 +4,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ✅ Supabase 설정
-SUPABASE_URL = st.secrets.get("SUPABASE_URL", os.getenv("SUPABASE_URL"))
-SUPABASE_KEY = st.secrets.get("SUPABASE_API_KEY", os.getenv("SUPABASE_API_KEY"))
+# ✅ secrets.toml이 있는지 확인
+USE_STREAMLIT_SECRETS = hasattr(st, "secrets") and st.secrets._file_paths
 
-# ✅ OpenAI 설정
-OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+# ✅ Supabase
+if USE_STREAMLIT_SECRETS:
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_API_KEY"]
+    OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+else:
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_API_KEY")
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # ✅ 필수 키 확인
 if not SUPABASE_URL or not SUPABASE_KEY:
