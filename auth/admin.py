@@ -35,11 +35,15 @@ def show_admin_page():
         system_prompt = st.text_area("📜 GPT system prompt", height=200)
         rubric_prompt = st.text_area("📋 GPT 평가 루브릭 프롬프트", height=250)
 
+        # ✅ 학생 수 입력 (기본값 30)
+        student_count = st.number_input("👥 생성할 학생 수", min_value=1, max_value=100, value=30, step=1)
+
+
         if st.button("✅ 학급 생성"):
             if not name or not password or not system_prompt or not rubric_prompt:
                 st.warning("모든 항목을 입력해 주세요.")
             else:
-                success = create_class(name, password, system_prompt, rubric_prompt)
+                success = create_class(name, password, system_prompt, rubric_prompt, student_count)
                 if success:
                     st.success("✅ 학급이 성공적으로 생성되었습니다.")
                 else:
